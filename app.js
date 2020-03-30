@@ -44,7 +44,7 @@ const promptUser = () => {
 const viewEmployees = () => {
     connection.query('SELECT * FROM employees', (err, employees) => {
         if(err) throw err;
-        console.log(employees);
+        console.table(employees);
         promptUser();
     })
 }
