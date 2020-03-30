@@ -50,7 +50,7 @@ const viewEmployees = () => {
 }
 
 const addEmployee = () => {
-    connection.query('SELECT title FROM roles', (err, roles) => {
+    connection.query('SELECT * FROM roles', (err, roles) => {
         if(err) throw err;
         connection.query('SELECT * FROM employees', (err, employees) => {
             if(err) throw err;
@@ -82,12 +82,12 @@ const addEmployee = () => {
                 let manager_id;
                 roleChoices.forEach((el, i) => {
                     if(el === res.role){
-                        role_id = i;
+                        role_id = roles[i].id
                     }
                 })
                 managerChoices.forEach((el, i) => {
                     if(el === res.manager){
-                        manager_id = i;
+                        manager_id = employees[i].id;
                     }
                 })
                 connection.query(
