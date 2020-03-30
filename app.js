@@ -25,11 +25,14 @@ const promptUser = () => {
         name: "userAction",
         type: "list",
         message: "What would you like to do?",
-        choices: ['View Employees', 'Add Employee', 'Remove Employee']
+        choices: ['View Employees', 'View Employees By Manager', 'Add Employee', 'Remove Employee']
       }).then(res => {
         switch(res.userAction) {
             case 'View Employees':
                 viewEmployees();
+                break;
+            case 'View Employees By Manager':
+                viewEmployeesByManager();
                 break;
             case 'Add Employee':
                 addEmployee();
@@ -47,6 +50,39 @@ const viewEmployees = () => {
         console.table(employees);
         promptUser();
     })
+}
+
+const viewEmployeesByManager = () => {
+    connection.query('SELECT * FROM employees', (err, employees) => {
+        if(err) throw err;
+        let managerIds = [];
+        employees.forEach(el => {
+            if(el.manager_id != null){
+                managerIds.push(el.manager_id);
+            }
+        })
+        let employeesByManagerId;
+        const employeeFullNames = employees.map(employee => `${employee.first_name} ${employee.last_name}`)
+        let choices = employees.filter(employee => managerIds.includes(employee.id))
+        choices = choices.map(employee => `${employee.first_name} ${employee.last_name}`)
+        inquirer.prompt( {
+            name: "viewByManager",
+            type: "list",
+            message: "Which manager's employees would you like to view?",
+            choices
+        }).then(res => {
+            employeeFullNames.forEach((el, i) => {
+                if(el === res.viewByManager){
+                    employeesByManagerId = employees[i].id
+                }
+            })
+            connection.query(`SELECT * FROM employees WHERE manager_id = ${employeesByManagerId}`, (err, employees) => {
+                if(err) throw err;
+                console.table(employees);
+                promptUser();
+            })
+        });
+    });
 }
 
 const addEmployee = () => {
@@ -77,7 +113,6 @@ const addEmployee = () => {
                 choices: managerChoices
             }
             ]).then(res => {
-                console.log(res)
                 let role_id;
                 let manager_id;
                 roleChoices.forEach((el, i) => {
