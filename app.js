@@ -14,7 +14,7 @@ var connection = mysql.createConnection({
     database: "employeeDB"
   });
   
-  connection.connect(function(err) {
+  connection.connect(err => {
       if (err) throw err;
       console.log("connected as id " + connection.threadId);
       promptUser();
@@ -26,7 +26,7 @@ const promptUser = () => {
         type: "list",
         message: "What would you like to do?",
         choices: ['View Employees', 'Add Employee', 'Remove Employee']
-      }).then(function(res) {
+      }).then(res => {
         switch(res.userAction) {
             case 'View Employees':
                 viewEmployees();
@@ -76,7 +76,7 @@ const addEmployee = () => {
                 message: "Who is the employee's manager?",
                 choices: managerChoices
             }
-            ]).then(function(res) {
+            ]).then(res => {
                 console.log(res)
                 let role_id;
                 let manager_id;
@@ -98,7 +98,7 @@ const addEmployee = () => {
                       role_id,
                       manager_id
                     },   
-                    function(err){
+                    err => {
                       if (err) throw err;
                       console.log('Employee was successfully added!');
                       promptUser();
@@ -118,17 +118,14 @@ const removeEmployee = () => {
             type: "list",
             message: "Which employee would you like to remove?",
             choices
-        }).then(function(res) {
+        }).then(res => {
             let removedEmployeeId;
             choices.forEach((el, i) => {
                 if(el === res.removedEmployee){
-                    removedEmployeeId = employees[i].id
+                    removedEmployeeId = employees[i].id;
                 }
             })
-            connection.query(
-            "DELETE FROM employees WHERE id = ?",
-                [removedEmployeeId],   
-                function(err){
+            connection.query(`DELETE FROM employees WHERE id = ${removedEmployeeId}`,  err => {
                     if (err) throw err;
                     console.log('Employee was successfully removed!');
                     promptUser();
