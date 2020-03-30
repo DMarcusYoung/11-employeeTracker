@@ -4,7 +4,7 @@ CREATE database employeeDB;
 USE employeeDB;
 
 CREATE TABLE employees (
-    id INT NOT NULL,
+    id INT AUTO_INCREMENT NOT NULL,
     first_name VARCHAR(30) ,
     last_name VARCHAR(30),
     role_id INT,
@@ -13,7 +13,7 @@ CREATE TABLE employees (
 ); 
 
 CREATE TABLE roles (
-    id INT NOT NULL,
+    id INT AUTO_INCREMENT NOT NULL,
     title VARCHAR(30),
     salary DECIMAL,
     department_id INT,
@@ -21,7 +21,7 @@ CREATE TABLE roles (
 );
 
 CREATE TABLE departments(
-    id INT NOT NULL,
+    id INT AUTO_INCREMENT NOT NULL,
     name VARCHAR(30),
     PRIMARY KEY (id)
 );
