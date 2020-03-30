@@ -111,6 +111,7 @@ const addEmployee = () => {
 
 const removeEmployee = () => {
     connection.query('SELECT * FROM employees', (err, employees) => {
+        if(err) throw err;
         const choices = employees.map(employee => `${employee.first_name} ${employee.last_name}`)
         inquirer.prompt( {
             name: "removedEmployee",
@@ -118,11 +119,21 @@ const removeEmployee = () => {
             message: "Which employee would you like to remove?",
             choices
         }).then(function(res) {
-            choices.forEach(el =>{
+            let removedEmployeeId;
+            choices.forEach((el, i) => {
                 if(el === res.removedEmployee){
-                    // DELETE FROM people WHERE name = 'Peter' OR name = "Sam" AND pet_name = ''
+                    removedEmployeeId = employees[i].id
                 }
             })
+            connection.query(
+            "DELETE FROM employees WHERE id = ?",
+                [removedEmployeeId],   
+                function(err){
+                    if (err) throw err;
+                    console.log('Employee was successfully removed!');
+                    promptUser();
+                }
+            );
         });
     });
 }
