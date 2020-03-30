@@ -67,28 +67,23 @@ const addEmployee = () => {
             choices: roles
         }
         ]).then(function(res) {
+            // roles.forEach(el => {
+                
+            // })
             connection.query(
                 "INSERT INTO employees SET ?",
                 {
                   first_name: res.firstName,
                   last_name: res.lastName,
-                  role_id: response.startingBid,
-                  manager_id: response.startingBid
+                //   role_id: response.startingBid,
+                //   manager_id: response.startingBid
                 },   
                 function(err){
                   if (err) throw err;
-                  console.log('Item was successfully posted');
-                  postOrBid();
+                  console.log('Employee was successfully added!');
+                  promptUser();
                 }
             );
         });     
     })
 };
-
-// const getRoles = () => {
-//     connection.query('SELECT * FROM roles', (err, roles) => {
-//         if(err) throw err;
-//         roles = ['biba']
-//         return roles;
-//     })
-// }
