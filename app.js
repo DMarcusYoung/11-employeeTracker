@@ -25,14 +25,20 @@ const promptUser = () => {
         name: "userAction",
         type: "list",
         message: "What would you like to do?",
-        choices: ['View Employees', 'View Employees By Manager', 'Add Employee', 'Remove Employee']
+        choices: ['View Employees', 'View Employees By Manager', 'View Roles', 'View Departments', 'Add Employee', 'Remove Employee']
       }).then(res => {
         switch(res.userAction) {
             case 'View Employees':
-                viewEmployees();
+                view('employees')
                 break;
             case 'View Employees By Manager':
                 viewEmployeesByManager();
+                break;
+            case 'View Roles':
+                view('roles')
+                break;
+            case 'View Departments':
+                view('departments')
                 break;
             case 'Add Employee':
                 addEmployee();
@@ -44,10 +50,10 @@ const promptUser = () => {
   });
 }
 
-const viewEmployees = () => {
-    connection.query('SELECT * FROM employees', (err, employees) => {
+const view = (table) => {
+    connection.query(`SELECT * FROM ${table}`, (err, table) => {
         if(err) throw err;
-        console.table(employees);
+        console.table(table);
         promptUser();
     })
 }
