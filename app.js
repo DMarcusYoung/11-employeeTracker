@@ -25,7 +25,7 @@ const promptUser = () => {
         name: "userAction",
         type: "list",
         message: "What would you like to do?",
-        choices: ['View Employees', 'View Employees By Manager', 'View Roles', 'View Departments', 'Add Employee', 'Remove Employee']
+        choices: ['View Employees', 'View Employees By Manager', 'View Roles', 'View Departments', 'Add Employee', 'Remove Employee', 'Remove Role', 'Remove Department']
       }).then(res => {
         switch(res.userAction) {
             case 'View Employees':
@@ -44,7 +44,13 @@ const promptUser = () => {
                 addEmployee();
                 break;
             case 'Remove Employee':
-                removeEmployee();
+                remove('employees');
+                break;
+            case 'Remove Role':
+                remove('roles');
+                break;
+            case 'Remove Department':
+                remove('departments');
                 break;
         }
   });
@@ -169,6 +175,40 @@ const removeEmployee = () => {
             connection.query(`DELETE FROM employees WHERE id = ${removedEmployeeId}`,  err => {
                     if (err) throw err;
                     console.log('Employee was successfully removed!');
+                    promptUser();
+                }
+            );
+        });
+    });
+}
+
+const remove = (table) => {
+    connection.query(`SELECT * FROM ${table}`, (err, tableArr) => {
+        if(err) throw err;
+        let choices;
+        if(table === 'employees') {
+            choices = tableArr.map(employee => `${employee.first_name} ${employee.last_name}`)
+        } else if (table === 'roles'){
+            choices = tableArr.map(role => role.title)
+        }else {
+            choices = tableArr.map(department => department.name)
+        }
+            
+        inquirer.prompt( {
+            name: "removed",
+            type: "list",
+            message: "Which would you like to remove?",
+            choices
+        }).then(res => {
+            let removedId;
+            choices.forEach((el, i) => {
+                if(el === res.removed){
+                    removedId = tableArr[i].id;
+                }
+            })
+            connection.query(`DELETE FROM ${table} WHERE id = ${removedId}`,  err => {
+                    if (err) throw err;
+                    console.log('Successfully removed!');
                     promptUser();
                 }
             );
