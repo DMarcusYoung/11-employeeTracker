@@ -46,6 +46,9 @@ const promptUser = () => {
             case 'Add Role':
                 addRole();
                 break;
+            case 'Add Department':
+                addDepartment();
+                break;
             case 'Update Employee Role':
                 updateEmployeeRole();
                 break;
@@ -207,6 +210,26 @@ const addRole = () => {
         });
     });
 };
+
+const addDepartment = () => {
+    connection.query('SELECT * FROM roles', (err, roles) => {
+        if(err) throw err;
+        inquirer.prompt(
+            {
+                name: 'name',
+                type: 'input',
+                message: 'What is the name of this department?'
+            }
+        ).then(res => {
+            connection.query( "INSERT INTO departments SET ?",{ name: res.name }, err => {
+                  if (err) throw err;
+                  console.log('Department was successfully added!');
+                  promptUser();
+                }
+            );
+        })
+    });
+}
 
 const updateEmployeeRole = () => {
     connection.query('SELECT * FROM roles', (err, roles) => {
