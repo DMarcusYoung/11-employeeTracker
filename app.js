@@ -25,7 +25,7 @@ const promptUser = () => {
         name: "userAction",
         type: "list",
         message: "What would you like to do?",
-        choices: ['View Employees', 'View Employees By Manager', 'View Roles', 'View Departments', 'Add Employee', 'Remove Employee', 'Remove Role', 'Remove Department']
+        choices: ['View Employees', 'View Employees By Manager', 'View Roles', 'View Departments', 'Add Employee', 'Add Role', 'Add Department', 'Update Employee Role','Remove Employee', 'Remove Role', 'Remove Department']
       }).then(res => {
         switch(res.userAction) {
             case 'View Employees':
@@ -42,6 +42,12 @@ const promptUser = () => {
                 break;
             case 'Add Employee':
                 addEmployee();
+                break;
+            case 'Add Role':
+                addRole();
+                break;
+            case 'Update Employee Role':
+                updateEmployeeRole();
                 break;
             case 'Remove Employee':
                 remove('employees');
@@ -156,28 +162,91 @@ const addEmployee = () => {
     });
 };
 
-const removeEmployee = () => {
-    connection.query('SELECT * FROM employees', (err, employees) => {
+const addRole = () => {
+    connection.query('SELECT * FROM roles', (err, roles) => {
         if(err) throw err;
-        const choices = employees.map(employee => `${employee.first_name} ${employee.last_name}`)
-        inquirer.prompt( {
-            name: "removedEmployee",
-            type: "list",
-            message: "Which employee would you like to remove?",
-            choices
-        }).then(res => {
-            let removedEmployeeId;
-            choices.forEach((el, i) => {
-                if(el === res.removedEmployee){
-                    removedEmployeeId = employees[i].id;
+        connection.query('SELECT * FROM departments', (err, departments) => {
+            if(err) throw err;
+            const choices = departments.map(department => department.name)
+            inquirer.prompt([
+                {
+                    name: 'title',
+                    type: 'input',
+                    message: "What is the name of this role?"
+                },{
+                    name: 'salary',
+                    type: 'number',
+                    message: "What is the salary for this role?"
+                },{
+                    name: 'department',
+                    type: 'list',
+                    message: "Which department does this role belong to?",
+                    choices
                 }
-            })
-            connection.query(`DELETE FROM employees WHERE id = ${removedEmployeeId}`,  err => {
-                    if (err) throw err;
-                    console.log('Employee was successfully removed!');
-                    promptUser();
-                }
-            );
+            ]).then(res => {
+                let department_id;
+                choices.forEach((el, i) => {
+                    if(el === res.department){
+                        department_id = departments[i].id
+                    }
+                })
+                connection.query(
+                    "INSERT INTO roles SET ?",
+                    {
+                      title: res.title,
+                      salary: res.salary,
+                      department_id,
+                    },   
+                    err => {
+                      if (err) throw err;
+                      console.log('Role was successfully added!');
+                      promptUser();
+                    }
+                );
+            });
+        });
+    });
+};
+
+const updateEmployeeRole = () => {
+    connection.query('SELECT * FROM roles', (err, roles) => {
+        if(err) throw err;
+        connection.query('SELECT * FROM employees', (err, employees) => {
+            if(err) throw err;
+            const roleChoices = roles.map(role => role.title)
+            const employeeChoices = employees.map(employee => `${employee.first_name} ${employee.last_name}`)
+            inquirer.prompt([
+            {
+                name: 'updatedEmployee',
+                type: 'list',
+                message: "Which employee would you like to update?",
+                choices: employeeChoices
+            },{
+                name: 'role',
+                type: 'list',
+                message: "What is the employee's updated role?",
+                choices: roleChoices
+            }
+            ]).then(res => {
+                let role_id;
+                let employee_id;
+                roleChoices.forEach((el, i) => {
+                    if(el === res.role){
+                        role_id = roles[i].id
+                    }
+                })
+                employeeChoices.forEach((el, i) => {
+                    if(el === res.updatedEmployee){
+                        employee_id = employees[i].id;
+                    }
+                })
+                connection.query(`UPDATE employees SET role_id = ${role_id} WHERE id = ${employee_id}`, err => {
+                      if (err) throw err;
+                      console.log('Employee was successfully Updated!');
+                      promptUser();
+                    }
+                );
+            });     
         });
     });
 }
@@ -192,8 +261,7 @@ const remove = (table) => {
             choices = tableArr.map(role => role.title)
         }else {
             choices = tableArr.map(department => department.name)
-        }
-            
+        }            
         inquirer.prompt( {
             name: "removed",
             type: "list",
